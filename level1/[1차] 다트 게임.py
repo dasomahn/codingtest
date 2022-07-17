@@ -1,3 +1,4 @@
+```
 import re
 
 def solution(dartResult):
@@ -30,3 +31,24 @@ def solution(dartResult):
             i += 1
 
     return sum(nums)
+```
+
+import re
+
+def solution(dartResult):
+    answer = []
+    dart = re.findall('(\d+)([SDT])([*#]?)',dartResult)
+    # dart = re.findall('\d+[SDT][*#]?',dartResult)
+    # without (), results come out as a whole string ex. 3D, not '3', 'D', ''
+    
+    nums = {'S': 1, 'D': 2, 'T': 3}
+    options = {'#': -1, '*': 2, '': 1}
+    
+    
+    for i in range(len(dart)):
+        answer.append(int(dart[i][0]) ** nums[dart[i][1]] * options[dart[i][2]])
+        
+        if i>0 and dart[i][2] == '*':
+            answer[i-1] *= 2    
+    
+    return sum(answer)
