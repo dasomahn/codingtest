@@ -17,3 +17,6 @@ def solution(s):
     # return True
     
     # return True if s.isdecimal() else False
+
+# answer
+    return len(s) in (4, 6) and s.isdecimal()
