@@ -1,4 +1,4 @@
-def solution(numbers):
+# def solution(numbers):
 #     made = []
     
 #     for i in range(len(numbers)-1):
@@ -10,6 +10,16 @@ def solution(numbers):
 #             numbers[i], numbers[j] = numbers[j], numbers[i]
             
 #     return str(max(made))
+
+from itertools import permutations
+
+def solution(numbers):
+    
+    made = []
+    for case in set( permutations(numbers) ):
+        made.append(''.join(str(i) for i in case))
+    
+    return max(made)
 
                     
         
