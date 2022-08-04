@@ -1,25 +1,47 @@
-# def solution(numbers):
-#     made = []
-    
-#     for i in range(len(numbers)-1):
-#         for j in range(i+1, len(numbers)):
-#             numbers[i], numbers[j] = numbers[j], numbers[i]
-#             made.append("".join(str(i) for i in numbers))
-#             made.append("".join(str(i) for i in reversed(numbers)))
-            
-#             numbers[i], numbers[j] = numbers[j], numbers[i]
-            
-#     return str(max(made))
+from functools import cmp_to_key
 
-from itertools import permutations
+def sort_fuc(x, y):
+#     s_x = str(x)
+#     s_y = str(y)
+    
+#     if s_x[0] > s_y[0]:
+#         return -1
+#     elif s_x[0] < s_y[0]:
+#         return 1
+#     else:
+# #         s_x[0] == s_y[0]
+#         left = int(s_x + s_y)
+#         right = int(s_y + s_x)
+        
+#         if left > right:
+#             return -1
+#         elif left < right:
+#             return 1
+#         else:
+#             return 0
+
+# cleaner
+    left = int(x+y)
+    right = int(y+x)
+    
+    if left > right:
+        return -1
+    elif left < right:
+        return 1
+    else:
+        return 0
 
 def solution(numbers):
-    
-    made = []
-    for case in set( permutations(numbers) ):
-        made.append(''.join(str(i) for i in case))
-    
-    return max(made)
+#     sort = sorted(numbers, key = cmp_to_key(sort_fuc))
+#     return(str(int(''.join(str(i) for i in sort))))    
+                
+    numbers = [str(i) for i in numbers]
+    sort = sorted(numbers, key = cmp_to_key(sort_fuc))
+                
+    return(str(int(''.join(sort))))   
 
-                    
-        
+# simpler & faster    
+# def solution(numbers):
+#     numbers = list(map(str, numbers))
+#     numbers.sort(key=lambda x: x*3, reverse=True)
+#     return str(int(''.join(numbers)))
