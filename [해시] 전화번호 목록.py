@@ -12,13 +12,16 @@ def solution(phone_book):
     # length = len(phone_book)
     # for i in range(length-1):
     #     for j in range(i+1, length):
-    #         if phone_book[i] == phone_book[j][:len(phone_book[i])]:
-    #             return False
+    #         if phone_book[i][0] == phone_book[j][0]:
+    #             if phone_book[j].startswith(phone_book[i]):
+    #                 return False
     # return True
     
     phone_book.sort()
-    dic = {x:[] for x in range(10)}
-    for phone in phone_book:
-        dic[int(phone[0])].append(phone)
+    length = len(phone_book)
     
-    print(sorted(dic.items(), key = lambda x: len(x[1]), reverse = True))
+    for i in range(length-1):
+        if phone_book[i+1].startswith(phone_book[i]):
+            return False
+    
+    return True
