@@ -1,13 +1,21 @@
+from itertools import permutations        
+
 def solution(k, dungeons):
-    answer = 0
+
+    per = permutations(dungeons, len(dungeons))
+    rounds = []
+    life = k
     
-    length = len(dungeons)
-    dungeons.sort(key=lambda x: (-x[0], x[1]))
-    for d in dungeons:
-        if k>=d[0]:
-            answer += 1
-            k -= 20
-        else:
-            return answer
+    for case in per:
+        answer = 0
+        k = life
+        for d in case:
+            if k >= d[0]:
+                answer += 1
+                k -= d[1]
+            else:
+                rounds.append(answer)
+                break
+        rounds.append(answer)
     
-    return answer
+    return max(rounds)
