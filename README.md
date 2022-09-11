@@ -1,1 +1,1 @@
-BOJ-algorithm-python
+Programmers 코딩테스트 풀이
