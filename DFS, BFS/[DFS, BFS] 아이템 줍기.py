@@ -1,52 +1,66 @@
-def check_edge(rect, x, y):
-    if (rect[0] <= x <= rect[2]) and (rect[1] <= y <= rect[3]):
-        return 1
+def check_inner(map, x, y):
+    if (map[x][y]):
+        if (map[x-1][y] and map[x+1][y] and map[x][y-1] and map[x][y+1] and 
+        map[x-1][y-1] and map[x+1][y+1] and map[x+1][y-1] and map[x-1][y+1]):
+            return 1
     return 0
 
-def check_line(x1, y1, x2, y2):
-    if (abs(x1 - x2) == 2) or (abs(y1 - y2))
-        return 1
-    return 0
-
-def solution(rectangle, characterX, characterY, itemX, itemY):
+def solution(rectangle, charX, charY, itemX, itemY):
     answer = 0
     
-    d = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    pre_d = (0, 0)
-    change_d = 0
-    route = []
+    minX = 52
+    minY = 52
+    maxX = 0
+    maxY = 0
     
-    while ((characterX != itemX) and (characterY != itemY)):
-        # locate 가능한 위치 찾기
-        for cur_d in d:
-            for rect in rectangle:
-                if pre_d == cur_d:
-                    continue
-                if (check_edge(rect, characterX + cur_d[0], characterX + cur_d[1])):
-                    route.append((characterX + cur_d[0], characterX + cur_d[1]))
-                    print(route)
-                    break
-                    
-        posX, posY = route.pop()
-        # 한개일 경우 (같은 직사각형 이동)
-        if !route:
-            if pre_d == (posX-characterX, posY-characterY):
-                change = pre_d
-                pre_d = (posX-characterX, posY-characterY)
-            else:
-                change =0
-            characterX = posX
-            characterY = posY
-            # update 함수 하나 만들까
-        else:
-            posX2, posY2 = route.pop()
-            if (check_line(posX, posY, posX2, posY2)):
+    for rect in rectangle:
+        if (rect[0] < minX):
+            minX = rect[0]
+        elif (rect[2] > maxX):
+            maxX = rect[2]
+    
+        if (rect[1] < minY):
+            minY = rect[1]
+        elif (rect[3] > maxY):
+            maxY = rect[3]
+            
+    map = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
+    inner = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
+    route = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
+    
+    for rect in rectangle:
+        for x in range(2*rect[0], 2*rect[2] + 1):
+            for y in range(2*rect[1], 2*rect[3] + 1):
+                map[x][y] = 1
                 
-        #+2 %4
-        
-        
-        answer += 1
-
+    for i in range(minX*2, maxX*2):
+        for j in range(minY*2, maxY*2):
+            if check_inner(map, i, j):
+                inner[i][j] = 1
     
+    for i in range(minX*2, maxX*2 + 1):
+        for j in range(minY*2, maxY*2 + 1):
+            route[i][j] = map[i][j] - inner[i][j]
+
+    for i in range(len(map)):
+        for j in range(len(map[0])):
+            print(route[i][j], end = "")
+        print("")
+
+    d = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    charX *= 2
+    charY *= 2
+    itemX *= 2
+    itemY *= 2
+    
+    # while not((charX == itemX) and (charY == itemY)):
+    #     for cur_d in d:
+    #         print(charX + cur_d[0],charY + cur_d[1])
+    #         if route[charX + cur_d[0]][charY + cur_d[1]]:
+    #             answer += 1
+    #             break
+    #     charX = charX + cur_d[0]
+    #     charY = charY + cur_d[1]
     
     return answer
+solution([[1, 1, 5, 7]], 1, 1, 4, 7)
