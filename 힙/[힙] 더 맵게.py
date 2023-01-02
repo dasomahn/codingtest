@@ -1,13 +1,15 @@
+import heapq
+
 def solution(scoville, K):
     answer = 0
+    heapq.heapify(scoville)
     
     while any(s < K for s in scoville):
         if (len(scoville) == 1):
             return -1
-        scoville.sort(reverse = True)
-        a = scoville.pop()
-        b = scoville.pop()
-        scoville.append(a + b*2)
+        a = heapq.heappop(scoville)
+        b = heapq.heappop(scoville)
+        heapq.heappush(scoville, a + b*2)
         answer += 1
         
     return answer
