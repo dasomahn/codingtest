@@ -40,7 +40,11 @@ def solution(number, k):
 def solution(number, k):
     stack = []
     
-    for n in number:
+    for i, n in enumerate(number):
+        if k == 0:
+            stack.append(number[i:])
+            break
+        
         while (stack) and (stack[-1] < n) and (k > 0):
             stack.pop()
             k -= 1
