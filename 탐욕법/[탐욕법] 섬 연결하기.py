@@ -1,8 +1,3 @@
-def update(parent, M, m):
-    for i, p in enumerate(parent):
-        if p == M:
-            parent[i] = m
-
 def getParent(p, i):
     if i == p[i]:
         return i
@@ -14,7 +9,6 @@ def union(p, a, b):
     if a == b:
         return -1
     p[max(a, b)] = min(a, b)
-    update(p, max(a, b), min(a, b))
 
 def solution(n, costs):
     costs.sort(key=lambda x:x[2])
@@ -27,8 +21,7 @@ def solution(n, costs):
             continue
             
         answer += c
-        
-        if set(parent) == 0:
-            break
-        
-    return answer
+        n -= 1
+
+        if n == 1:
+            return answer
