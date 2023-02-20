@@ -1,20 +1,29 @@
+from collections import deque
+
+def bfs(i, graph):
+    queue = deque()
+    queue.append(i)
+    visited = set()
+    
+    while(queue):
+        cur = queue.popleft()
+        visited.add(cur)
+        for n in graph[cur]:
+            if n not in visited:
+                queue.append(n)
+    
+    return len(visited) - 1
+
 def solution(n, results):
-    graph = {}
+    in_graph = [[] for _ in range(n+1) ]
+    out_graph = [[] for _ in range(n+1) ]
+    
     for a, b in results:
-        graph[a] = graph.get(a, []) + [b]
+        in_graph[b].append(a)
+        out_graph[a].append(b)
     
-    answer = []
-    for i in range(1, n):
-        cnt = 0
-        for node in graph:
-            if i == node:
-                cnt += 1
-            elif i in graph[node]:
-                cnt += 1
-        if cnt == n-1:
-            answer.append(i)
+    con = [0] * (n+1)
+    for i in range(1, n+1):
+        con[i] = bfs(i, in_graph) + bfs(i, out_graph)
     
-    for a in answer:
-        answer.extend(graph.get(a, []))
-    
-    return len(answer)
+    return con.count(n-1)
