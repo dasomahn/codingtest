@@ -5,36 +5,40 @@
 # ...
 # nn...nn, 1 op N-1, 2 op N-2, ... N-1, 1
 
-def repeat(N, times):
-    num = N
-    while (times > 1):
-        num = num*10 + N
-        times -= 1
-    return num
-
-def four_op(a, b, s):
-    s.add(a + b)
-    s.add(a - b)
-    s.add(a * b)
-    s.add(a / b)
-
+def four_op(a_lst, b_lst, s):
+    for a in a_lst:
+        for b in b_lst:
+            s.append(a + b)
+            s.append(a * b)
+            if a >= b:
+                if (a != b): 
+                    s.append(a - b)
+                if b != 0:
+                    s.append(a // b)
+    
 def solution(N, number):
     answer = 1
+    repeat = 0
+    case = {}
     
-    cases = set()
     while (answer <= 8):
-        rep = repeat(N, answer)
-        if (rep == answer):
+        cases = []
+        
+        repeat = repeat * 10 + N
+        if (repeat == number):
             return answer
         else:
-            cases.add(rep)
+            cases.append(repeat)
         
         # 사칙연산        
         for i in range(1, answer):
-            four_op(left, right, cases)
-            if (number in cases):
-                return answer
+            four_op(case[i], case[answer-i], cases)
+
+        set_cases = set(cases)
+        if (number in set_cases):
+            return answer
         
+        case[answer] = set_cases
         answer += 1
     
     return -1
