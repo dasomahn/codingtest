@@ -1,3 +1,4 @@
+'''
 def solution(triangle):
     length = len(triangle)
     cases = {}
@@ -22,3 +23,14 @@ def solution(triangle):
         cases[i] = case
         
     return max(cases[length-1])
+'''
+
+# fixed
+def solution(triangle):
+    length = len(triangle)
+    
+    for i in range(length-2, -1, -1):
+        for j in range(i+1):
+            triangle[i][j] += max(triangle[i+1][j], triangle[i+1][j+1])
+        
+    return triangle[0][0]
