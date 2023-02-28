@@ -1,66 +1,46 @@
-def check_inner(map, x, y):
-    if (map[x][y]):
-        if (map[x-1][y] and map[x+1][y] and map[x][y-1] and map[x][y+1] and 
-        map[x-1][y-1] and map[x+1][y+1] and map[x+1][y-1] and map[x-1][y+1]):
-            return 1
-    return 0
+# → ↑ ← ↓ 순
+d = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+board = []
+moves = []
+
+def dfs(x, y, itemX, itemY, dist):
+    global d, board, moves
+    moves[x][y] = 1
+    
+    for dx, dy in d:
+        nx, ny = x + dx, y + dy
+        if (nx, ny) == (itemX, itemY):
+            return (dist + 1)/2
+        
+        if not moves[nx][ny] and board[nx][ny]:
+            return dfs(nx, ny, itemX, itemY, dist + 1)    
 
 def solution(rectangle, charX, charY, itemX, itemY):
-    answer = 0
+    global board, moves
+    # 두배 처리
+    maxX = 102
+    maxY = 102
     
-    minX = 52
-    minY = 52
-    maxX = 0
-    maxY = 0
+    # 좌표는 [x좌표][y좌표] 꼴로!
+    # 그림의 좌표처럼 생각했을 때는 [오른쪽 칸수][위쪽 칸수]
+    board = [[0] * maxY for _ in range(maxX)]
+    moves = [[0] * maxY for _ in range(maxX)]
     
-    for rect in rectangle:
-        if (rect[0] < minX):
-            minX = rect[0]
-        elif (rect[2] > maxX):
-            maxX = rect[2]
+    # 사각형 채우기
+    for x1, y1, x2, y2 in rectangle:
+        for x in range(x1 * 2, x2 * 2 + 1):
+            for y in range (y1 * 2, y2 * 2 + 1):
+                board[x][y] = 1
     
-        if (rect[1] < minY):
-            minY = rect[1]
-        elif (rect[3] > maxY):
-            maxY = rect[3]
-            
-    map = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
-    inner = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
-    route = [ [0] * (2*maxY+2) for _ in range(2*maxX+2)]
+    # 모서리 남기고 다시 비우기
+    for x1, y1, x2, y2 in rectangle:
+        for x in range(x1 * 2 + 1, x2 * 2):
+            for y in range (y1 * 2 + 1, y2 * 2):
+                board[x][y] = 0
     
-    for rect in rectangle:
-        for x in range(2*rect[0], 2*rect[2] + 1):
-            for y in range(2*rect[1], 2*rect[3] + 1):
-                map[x][y] = 1
-                
-    for i in range(minX*2, maxX*2):
-        for j in range(minY*2, maxY*2):
-            if check_inner(map, i, j):
-                inner[i][j] = 1
+    answer = dfs(charX * 2, charY * 2, itemX * 2, itemY * 2, 0)
     
-    for i in range(minX*2, maxX*2 + 1):
-        for j in range(minY*2, maxY*2 + 1):
-            route[i][j] = map[i][j] - inner[i][j]
-
-    for i in range(len(map)):
-        for j in range(len(map[0])):
-            print(route[i][j], end = "")
-        print("")
-
-    d = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    charX *= 2
-    charY *= 2
-    itemX *= 2
-    itemY *= 2
+    d = [(0, -1), (-1, 0), (0, 1), (1, 0)]
+    answer2 = dfs(charX * 2, charY * 2, itemX * 2, itemY * 2, 0)
     
-    # while not((charX == itemX) and (charY == itemY)):
-    #     for cur_d in d:
-    #         print(charX + cur_d[0],charY + cur_d[1])
-    #         if route[charX + cur_d[0]][charY + cur_d[1]]:
-    #             answer += 1
-    #             break
-    #     charX = charX + cur_d[0]
-    #     charY = charY + cur_d[1]
-    
-    return answer
-solution([[1, 1, 5, 7]], 1, 1, 4, 7)
+    return min(answer, answer2)
