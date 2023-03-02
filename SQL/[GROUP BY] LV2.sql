@@ -30,3 +30,19 @@ SELECT TRUNCATE(PRICE, -4) as price_group, COUNT(*) as products
 FROM PRODUCT
 GROUP BY price_group
 ORDER BY price_group
+
+-- 성분으로 구분한 아이스크림 총 주문량
+SELECT ingredient_type, SUM(total_order) as total_order
+FROM FIRST_HALF as h
+JOIN ICECREAM_INFO as i on h.flavor = i.flavor
+# JOIN ICECREAM_INFO using (flavor)
+GROUP BY ingredient_type
+ORDER BY total_order
+
+-- 자동차 종류 별 특정 옵션이 포함된 자동차 수 구하기
+SELECT car_type, count(*) as CARS
+FROM CAR_RENTAL_COMPANY_CAR
+WHERE options LIKE '%시트%'
+# WHERE options REGEXP '통풍시트|열선시트|가죽시트'
+GROUP BY car_type
+ORDER BY car_type
