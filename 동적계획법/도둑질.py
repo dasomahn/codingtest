@@ -16,8 +16,7 @@ ex2) 1 3 1 1 6 1
 
 '''
 
-def solution(money):
-    n = len(money)
+def cal(money, n):
     dp = [0] * n
     
     for i in range(n):
@@ -26,3 +25,11 @@ def solution(money):
         dp[i] = max(dp[i-1], dp[i-2] + money[i])
     
     return (dp[n-1])
+
+def solution(money):
+    n = len(money)
+    
+    a = cal(money[:-1], n-1)
+    b = cal(money[1:], n-1)
+    
+    return max(a, b)
