@@ -8,12 +8,20 @@ sort()가 시간초과가 나니 다른 정렬법 사용해야 함
 '''
 
 def solution(n, times):
-    cases = []
-    
-    for i in range(1, n):
-        for t in times:
-            cases.append(t*i)
-    
-    cases.sort()
+    left = 1
+    right = max(times) * n
+
+    answer = 0
+    while left < right:
+        mid = (left + right) // 2
+        people = 0
+        for time in times:
+            people += mid // time
             
-    return cases[n-1]
+        if people >= n:
+            right = mid
+        else:
+            left = mid + 1
+    answer = left
+
+    return answer
