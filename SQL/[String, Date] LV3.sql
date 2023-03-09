@@ -1,0 +1,6 @@
+-- 대여 기록이 존재하는 자동차 리스트 구하기
+SELECT DISTINCT car_id
+FROM CAR_RENTAL_COMPANY_CAR 
+NATURAL JOIN CAR_RENTAL_COMPANY_RENTAL_HISTORY
+WHERE car_type = '세단' and MONTH(start_date) = 10
+ORDER BY car_id DESC
