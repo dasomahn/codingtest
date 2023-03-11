@@ -34,3 +34,13 @@ on c.car_type = p.car_type and
         END
 WHERE c.car_type = '트럭'
 ORDER BY fee DESC, history_id DESC
+
+-- 취소되지 않은 진료 예약 조회하기
+SELECT apnt_no, pt_name, pt_no, d.mcdp_cd, dr_name, apnt_ymd
+FROM APPOINTMENT a
+JOIN PATIENT p USING (pt_no)
+JOIN DOCTOR d ON  (d.dr_id = a.mddr_id)
+WHERE DATE_FORMAT(apnt_ymd, '%Y-%m-%d') = '2022-04-13'
+and apnt_cncl_yn != 'Y'
+and d.mcdp_cd = 'CS'
+ORDER BY apnt_ymd
