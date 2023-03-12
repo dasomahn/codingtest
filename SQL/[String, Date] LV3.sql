@@ -21,3 +21,26 @@ FROM ANIMAL_OUTS as o
 JOIN ANIMAL_INS as i USING (animal_id)
 ORDER BY (o.datetime - i.datetime) DESC
 LIMIT 2
+
+-- 조회수가 가장 많은 중고거래 게시판의 첨부파일 조회하기
+SELECT CONCAT('/home/grep/src/', board_id, '/', file_id, file_name, file_ext) AS FILE_PATH
+FROM USED_GOODS_FILE 
+WHERE board_id = (
+    SELECT board_id
+    FROM USED_GOODS_BOARD 
+    ORDER BY views DESC
+    LIMIT 1
+)
+ORDER BY file_id DESC
+
+-- 조건에 맞는 사용자와 총 거래금액 조회하기
+SELECT DISTINCT
+    user_id,
+    nickname,
+    CONCAT(city, " ", street_address1, " ", street_address2) as 전체주소,
+    CONCAT(LEFT(tlno, 3), '-', SUBSTR(tlno, 4, 4), '-', RIGHT(tlno, 4)) as 전화번호
+FROM USED_GOODS_BOARD
+JOIN USED_GOODS_USER ON writer_id = user_id
+GROUP BY writer_id
+HAVING COUNT(*) >= 3
+ORDER BY user_id DESC

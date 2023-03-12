@@ -61,3 +61,12 @@ SELECT CAR_ID,
 FROM CAR_RENTAL_COMPANY_RENTAL_HISTORY
 GROUP BY CAR_ID
 ORDER BY CAR_ID DESC
+
+-- 조건에 맞는 사용자 정보 조회하기
+SELECT user_id, nickname, SUM(price) as total
+FROM USED_GOODS_BOARD
+JOIN USED_GOODS_USER ON writer_id = user_id
+WHERE status = 'DONE'
+GROUP BY user_id
+HAVING total >= 700000
+ORDER BY total
