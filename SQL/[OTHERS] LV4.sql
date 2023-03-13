@@ -34,3 +34,34 @@ FROM OFFLINE_SALE
 WHERE YEAR(sales_date) = 2022 and MONTH(sales_date) = 3
 
 ORDER BY date, product_id, user_id
+
+-- Summer/Winter Coding(2019) > 우유와 요거트가 담긴 장바구니
+-- 풀이 1
+SELECT cart_id
+FROM CART_PRODUCTS 
+WHERE name in ('Milk', 'Yogurt')
+GROUP BY cart_id
+HAVING count(DISTINCT name) >= 2
+ORDER BY cart_id
+
+-- 풀이 2 (JOIN)
+SELECT DISTINCT m.cart_id
+FROM (
+    SELECT cart_id
+    FROM CART_PRODUCTS
+    WHERE name = 'Milk'
+) m
+NATURAL JOIN (
+    SELECT cart_id
+    FROM CART_PRODUCTS
+    WHERE name = 'Yogurt'
+) y
+ORDER BY cart_id
+
+-- 풀이 3 (GROUP_CONCAT)
+SELECT cart_id
+FROM CART_PRODUCTS
+GROUP BY cart_id
+HAVING GROUP_CONCAT(DISTINCT name) like '%Yogurt%'
+AND GROUP_CONCAT(DISTINCT name) like '%Milk%'
+ORDER BY cart_id
