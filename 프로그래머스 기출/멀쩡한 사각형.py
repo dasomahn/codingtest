@@ -1,3 +1,4 @@
+'''
 def solution(w,h):
     if w > h:
         w, h = h, w
@@ -11,3 +12,18 @@ def solution(w,h):
     h2 = h/gcd
     
     return w*h - ((h2 - 1 + w2) * gcd)
+'''
+
+# fixed
+def gcd(a, b):
+        res = a%b
+        if res == 0:
+            return b
+        else:
+            return gcd(b, res)
+
+def solution(w,h):
+    if w > h:
+        w, h = h, w
+    
+    return w*h - h - w + gcd(w, h)
