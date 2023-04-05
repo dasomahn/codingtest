@@ -10,7 +10,7 @@ class Room:
 
     def bound(self, x, y):
         if (0 <= x < self.r) and (0 <= y < self.c):
-            if (x, y) not in [(self.up, 0), (self.down, 0)]:
+            if not (self.up <= x <= self.down and y == 0):
                 return True
         return False
 
@@ -54,12 +54,12 @@ class Room:
             self.clean(dirs, self.up, 0)
             self.clean(c_dirs, self.down, 0)
 
-            self.grid[self.up][0] = 0
+            self.grid[self.up][0] = -1
             self.grid[self.up][1] = 0
-            self.grid[self.down][0] = 0
+            self.grid[self.down][0] = -1
             self.grid[self.down][1] = 0
 
-        total = sum(sum(self.grid[r]) for r in range(self.r))
+        total = sum(sum(self.grid[r]) for r in range(self.r)) + 2
         return total
 
 dirs = ((-1, 0), (0, 1), (1, 0), (0, -1))
