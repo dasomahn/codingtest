@@ -62,6 +62,7 @@ def dfs(x, y, total, graph):
 
     n, dirnum = graph[x][y]
     graph[x][y][0] = -1 # 현재 상어 위치 표시
+    total += n
 
     fish_move(graph)
 
