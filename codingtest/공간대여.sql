@@ -1,0 +1,7 @@
+SELECT NAME, SUM(price) as COST
+FROM PLACES p
+JOIN SCHEDULES s ON p.id = s.place_id
+WHERE scheduled_at BETWEEN '2019-01-05' and '2019-01-09'
+GROUP BY id
+HAVING count(*) = 5
+ORDER BY COST, NAME
