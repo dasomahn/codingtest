@@ -7,7 +7,7 @@ def outbound(x, y):
     return True
 
 
-def find_fish(num, graph):
+def find_fish(num):
     for i in range(4):
         for j in range(4):
             if graph[i][j][0] == num:
@@ -16,10 +16,10 @@ def find_fish(num, graph):
     return (-1, -1)
 
 
-def fish_move(graph):
+def fish_move():
     for i in range(1, 17):
         # 물고기 번호 i의 위치 갖고오기
-        x, y = find_fish(i, graph)
+        x, y = find_fish(i)
 
         if x == -1 and y == -1:  # 먹힌 물고기
             continue
@@ -45,7 +45,7 @@ def fish_move(graph):
         graph[x][y], graph[nx][ny] = graph[nx][ny], graph[x][y]
 
 
-def shark_can_move(x, y, ndir, graph):
+def shark_can_move(x, y, ndir):
     mov = []
     for i in range(1, 4):  # 1, 2, 3
         nx = x + ndir[0] * i
@@ -57,24 +57,24 @@ def shark_can_move(x, y, ndir, graph):
     return mov
 
 
-def dfs(x, y, total, graph):
-    global M
+def dfs(x, y, total, depth):
+    global M, graph
+    temp = copy.deepcopy(graph)
 
     n, dirnum = graph[x][y]
     graph[x][y][0] = -1 # 현재 상어 위치 표시
     total += n
 
-    fish_move(graph)
+    fish_move()
 
-    movable = shark_can_move(x, y, dirs[dirnum], graph)
+    movable = shark_can_move(x, y, dirs[dirnum])
     if not movable:
         M = max(M, total)
-        return
-
-    graph[x][y][0] = 0 # 상어 이동, 빈자리
-    for nx, ny in movable:
-        # 백트래킹을 위해 deepcopy 넘기기
-        dfs(nx, ny, total, copy.deepcopy(graph))
+    else:
+        graph[x][y][0] = 0 # 상어 이동, 빈자리
+        for nx, ny in movable:
+            dfs(nx, ny, total, depth + 1)
+    graph = temp
 
 
 dirs = {1: (-1, 0), 2: (-1, -1), 3: (0, -1), 4: (1, -1),
@@ -82,12 +82,12 @@ dirs = {1: (-1, 0), 2: (-1, -1), 3: (0, -1), 4: (1, -1),
 
 # init
 M = -1
-grid = [[], [], [], []]  # [숫자, 방향] 꼴
+graph = [[], [], [], []]  # [숫자, 방향] 꼴
 for x in range(4):
     line = list(map(int, input().split()))
     for y in range(4):
-        grid[x].append([line[2 * y], line[2 * y + 1]])
+        graph[x].append([line[2 * y], line[2 * y + 1]])
 
 # solve
-dfs(0, 0, 0, grid)
+dfs(0, 0, 0, 0)
 print(M)
