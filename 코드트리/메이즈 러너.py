@@ -22,27 +22,16 @@ def move():
             nx, ny = px+dx, py+dy
             if bound(nx, ny) and not grid[nx][ny]:
                 if dist > cal_dist(nx, ny):
-                    avail.append((nx, ny))
+                    total_moves += 1
+                    if nx == ex and ny == ey:
+                        M -= 1
+                        people[pnum][0] = -1
+                        people[pnum][1] = -1
+                    else:
 
-        if avail:
-            total_moves += 1
-            if len(avail) == 1:
-                nx, ny = avail[0]
-            else:
-                if avail[0][1] == py:
-                    nx, ny = avail[0]
-                else:
-                    nx, ny = avail[1]
-        else:
-            continue
-
-        if nx == ex and ny == ey:
-            M -= 1
-            people[pnum][0] = -1
-            people[pnum][1] = -1
-        else:
-            people[pnum][0] = nx
-            people[pnum][1] = ny
+                        people[pnum][0] = nx
+                        people[pnum][1] = ny
+                    break
 
 def find():
     w = 1
@@ -90,7 +79,7 @@ def rotate(rx, ry, w):
             people[pnum][1] = rx+ry-px+w
 
 
-dirs = ((0, 1), (1, 0), (0, -1), (-1, 0))
+dirs = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 T = int(input())
 
