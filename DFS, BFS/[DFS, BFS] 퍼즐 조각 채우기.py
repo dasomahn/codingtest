@@ -4,7 +4,7 @@ import copy
 N = 0
 dirs = ((-1, 0), (0, 1), (1, 0), (0, -1))
 blocks = {}  # 최상단 좌표, 길이
-blank = {}  # 최상단 좌표, 길이
+blanks = {}  # 최상단 좌표, 길이
 cnt = 0
 
 
@@ -17,11 +17,16 @@ def bound(x, y):
 def bfs(grid, visited, i, j, fill):
     q = deque([(i, j)])
 
-    length = 0
+    points = []
+    minx, miny = 50, 50
+
     while q:
         x, y = q.popleft()
+        minx = min(minx, x)
+        miny = min(miny, y)
+
         if not visited[x][y]:
-            length += 1
+            points.append((x, y))
         visited[x][y] = 1
 
         for dx, dy in dirs:
@@ -29,110 +34,100 @@ def bfs(grid, visited, i, j, fill):
             if bound(nx, ny) and grid[nx][ny] == fill and not visited[nx][ny]:
                 q.append((nx, ny))
 
-    return length
+    return points, minx, miny
 
 
 def group(grid, dic, fill, visited):
     dic.clear()
 
-    idx = 2
     for i in range(N):
         for j in range(N):
             if grid[i][j] == fill and not visited[i][j]:
-                length = bfs(grid, visited, i, j, fill)
-                dic[idx] = [i, j, length]
-                idx += 1
+                points, minx, miny = bfs(grid, visited, i, j, fill)
+                dic[(minx, miny)] = sorted(points)
 
 
-def compare(board, table, x, y, bx, by, n):
-    cmp = [[0] * N for _ in range(N)]
+def compare(blank_pos, block_pos):
+    a_list = blanks[blank_pos]
+    o_list = blocks[block_pos]
 
-    q = deque([(x, y, bx, by)])
+    a_minx, a_miny = blank_pos
+    o_minx, o_miny = block_pos
 
-    cnt = 0
-    while (q):
-        x, y, bx, by = q.popleft()
-        if not cmp[x][y]:
-            cnt += 1
-        cmp[x][y] = 1
-
-        for dx, dy in dirs:
-            nx, ny = x + dx, y + dy
-            b_nx, b_ny = bx + dx, by + dy
-            # 다음 빈자리가 있으면
-            if bound(nx, ny) and board[nx][ny] == 0 and not cmp[nx][ny]:
-                # 조각도 빈자리와 모양 맞으면
-                if bound(b_nx, b_ny) and table[b_nx][b_ny]:
-                    q.append((nx, ny, b_nx, b_ny))
-                else:
-                    # 해당 모양에 안맞다면
-                    return False
-    if cnt == n:
-        return True
-    else:
-        return False
+    for (a_x, a_y), (o_x, o_y) in zip(a_list, o_list):
+        # 상대좌표 비교
+        if (a_x - a_minx == o_x - o_minx) and (a_y - a_miny == o_y - o_miny):
+            continue
+        else:
+            return False
+    return True
 
 
 def match(game_board, table):
     global cnt
 
-    for idx, (i, j, n) in blank.items():
-        for g in blocks:
-            if n == blocks[g][2]:
-                if compare(game_board, table, i, j, blocks[g][0], blocks[g][1], n):
-                    cnt += n
-                    blocks[g][2] = 0
-                    blank[idx][2] = -1
+    for blank in blanks:
+        for block in blocks:
+            if blanks[blank] and blocks[block] and len(blanks[blank]) == len(blocks[block]):
+                if compare(blank, block):
+                    cnt += len(blanks[blank])
+                    blocks[block].clear()
+                    blanks[blank].clear()
 
                     # 매칭한 부분들 채우기
-                    fill(idx, game_board, blank, 0, 1)
-                    fill(g, table, blocks, 1, 0)
+                    fill(game_board, blanks[blank], 1)
+                    fill(table, blocks[block], 0)
                     break
 
 
-def fill(num, grid, dic, f, un_f):
-    q = deque([(dic[num][0], dic[num][1])])
-
-    while q:
-        x, y = q.popleft()
-        grid[x][y] = un_f
-
-        for dx, dy in dirs:
-            nx, ny = x + dx, y + dy
-            if bound(nx, ny) and grid[nx][ny] == f:
-                q.append((nx, ny))
-
-    return grid
+def fill(grid, lst, fill):
+    for x, y in lst:
+        grid[x][y] = fill
 
 
-def rotate(table):
-    # table 함수 전체 90도 시계방향
-    temp = copy.deepcopy(table)
+def rotate():
+    # block 그룹한거 내용 전부 90도 회전
+    temp = copy.deepcopy(blocks)
+    blocks.clear()
 
-    for i in range(N):
-        for j in range(N):
-            table[j][N - i - 1] = temp[i][j]
+    for (minx, miny) in temp:
+        lst = temp[(minx, miny)]
+        if not lst:
+            continue
+        newlst = []
 
-    return table
+        # 회전된거 기준으로 최소x, 최소y 다시 업데이트
+        minx, miny = 50, 50
+        for (x, y) in lst:
+            nx, ny = y, N - x - 1
+            newlst.append((nx, ny))
+            minx = min(minx, nx)
+            miny = min(miny, ny)
+
+        blocks[minx, miny] = sorted(newlst)
 
 
 def solution(game_board, table):
     global N, cnt
     N = len(game_board)
 
-    for i in range(4):
-        # 빈칸 그룹화하기
-        visited = [[0] * N for _ in range(N)]
-        group(game_board, blank, 0, visited)
+    # 빈칸 그룹화하기
+    visited = [[0] * N for _ in range(N)]
+    group(game_board, blanks, 0, visited)
 
-        # 블록 그룹화하기
-        visited = [[0] * N for _ in range(N)]
-        group(table, blocks, 1, visited)
+    # 블록 그룹화하기
+    visited = [[0] * N for _ in range(N)]
+    group(table, blocks, 1, visited)
+
+    match(game_board, table)
+    for i in range(3):
+        if len(blocks) == 0:
+            break
+
+        # 시계방향 90도
+        rotate()
 
         # 매칭하기
         match(game_board, table)
-
-        # 시계방향 90도
-        rotate(table)
 
     return cnt
