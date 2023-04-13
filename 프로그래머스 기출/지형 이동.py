@@ -6,9 +6,12 @@ diry = (-1, 0, 1, 0)
 level = None
 ladder = {}
 
+def bound(x, y):
+    if (0 <= x < N) and (0 <= y < N):
+        return True
+    return False
+
 def bfs(x, y, lv, land, height):
-    global N, dirx, diry, level
-    
     level[x][y] = lv
     queue = deque([[x, y]])
     
@@ -16,16 +19,14 @@ def bfs(x, y, lv, land, height):
         x, y = queue.popleft()
         for dx, dy in zip(dirx, diry):
             nx, ny = x+dx, y+dy
-            if ((0 <= nx < N) and (0 <= ny < N)) and (level[nx][ny] == 0) and abs(land[x][y] - land[nx][ny]) <= height:
+            if bound(nx, ny) and not level[nx][ny] and abs(land[x][y] - land[nx][ny]) <= height:
                 level[nx][ny] = lv
                 queue.append([nx, ny])    
 
 def connect(x, y, land):
-    global ladder, dirx, diry, level
-
     for dx, dy in zip(dirx, diry):
         nx, ny = x+dx, y+dy
-        if ((0 <= nx < N) and (0 <= ny < N)) and (level[x][y] != level[nx][ny]):
+        if bound(nx, ny) and level[x][y] != level[nx][ny]:
             M = max(level[x][y], level[nx][ny])
             m = min(level[x][y], level[nx][ny])
             ladder[(m, M)] = min(ladder.get((m, M), 9999), abs(land[x][y] - land[nx][ny]))
@@ -40,10 +41,10 @@ def union(graph, a, b):
     pa = parent(graph, a)
     pb = parent(graph, b)
     if pa == pb:
-        return 0
+        return False
     
     graph[max(pa, pb)] = min(pa, pb)
-    return 1
+    return True
             
 def solution(land, height):
     global N, level
@@ -66,7 +67,7 @@ def solution(land, height):
     
     # 연결점으로 최소 그래프 만들기
     sort_ladder = dict(sorted(ladder.items(), key=lambda x:x[1]))
-    graph = [i for i in range(lv)]
+    graph = [i for i in range(lv)] # 0 ~ 최고 lv (0은 미사용)
     cost = 0
     for (a, b), val in sort_ladder.items():
         if union(graph, a, b):
