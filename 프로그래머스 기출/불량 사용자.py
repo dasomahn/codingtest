@@ -31,3 +31,23 @@ def solution(user_id, banned_id):
     dfs(user_id, banned_id, 0, matched, 0)
     
     return(len(answer))
+
+# solution 2 (product)
+'''
+from itertools import product
+
+def solution(user_id, banned_id):
+    global N
+    N = len(user_id)
+    
+    matched = [[] for _ in range(len(banned_id))]
+    for u in user_id:
+        for i, b in enumerate(banned_id):
+            if len(u) == len(b) and match(u, b):
+                matched[i].append(u)
+    
+    answer = set()
+    for p in product(*matched):
+        if len(set(p)) == len(p):
+            answer.add("".join(set(p)))
+    return len(answer)
