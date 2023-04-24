@@ -1,5 +1,5 @@
 import sys
-sys.stdin = open("15665input.txt", "r")
+sys.stdin = open("input/15665input.txt", "r")
 
 def dfs(l):
     if l == M:

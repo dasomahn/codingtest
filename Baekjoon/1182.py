@@ -1,6 +1,6 @@
 import sys
 
-sys.stdin = open("1182input.txt", "r")
+sys.stdin = open("input/1182input.txt", "r")
 
 
 def comb(n, total, depth):

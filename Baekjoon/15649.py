@@ -1,5 +1,5 @@
 import sys
-sys.stdin = open("15649input.txt", "r")
+sys.stdin = open("input/15649input.txt", "r")
 
 
 def perm(nums, ans, depth):

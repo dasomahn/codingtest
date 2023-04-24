@@ -1,5 +1,5 @@
 import sys
-sys.stdin = open("15654input.txt", "r")
+sys.stdin = open("input/15654input.txt", "r")
 def dfs(l, idx):
     if l == M:
         print(' '.join(map(str, ans)))

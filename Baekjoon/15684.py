@@ -1,5 +1,5 @@
 import sys
-sys.stdin = open("15684input.txt", "r")
+sys.stdin = open("input/15684input.txt", "r")
 
 
 # (1, i)가 (N+1, i)로 도착하는지 검사

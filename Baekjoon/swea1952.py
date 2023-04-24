@@ -1,6 +1,6 @@
 import sys
 
-sys.stdin = open("swea1952input.txt", "r")
+sys.stdin = open("input/swea1952input.txt", "r")
 
 
 def dfs(idx, cost):
