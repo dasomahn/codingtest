@@ -1,148 +1,110 @@
 #include <iostream>
-#include <vector>
+#include <cstring>
 #include <queue>
 
 #define MAX_N 350
+#define MAX_ID 200
 
 using namespace std;
 
-pair<int, int> dirs[] = { {1, 0}, {0, 1}, {0, -1}, {-1, 0} };
+int dirs[][2] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
 
 int map[MAX_N][MAX_N];
-int visited[MAX_N][MAX_N];
+int n, range, max_id;
 
-vector<pair<int, int>> charger;
-vector<int> graph[200];
-int d[200][200];
+int visited[MAX_N][MAX_N]; // bfs용
+vector<pair<int, int>> graph[MAX_ID]; // node, weight
 
-int d_visited[200];
-int dijkstra[200];
-
-int n, full, max_id;
-
-int check(int r, int c) {
-	if ((0 <= r & r < n) & (0 <= c & c < n)) {
-		return 1;
-	}
-	return 0;
-}
+int visited_dist[MAX_ID]; // dijsktra용
 
 void init(int N, int mRange, int mMap[MAX_N][MAX_N])
 {
-	n = N;
-	full = mRange;
-
 	memcpy(map, mMap, sizeof(map));
-	charger.clear();
-	
-	memset(d, -1, sizeof(d));
-	for (int i = 0; i <= max_id; i++) {
+
+	for (int i = 0; i < MAX_ID; i++) {
 		graph[i].clear();
 	}
+
+	n = N;
+	range = mRange;
+	max_id = 0;
+
 	return;
 }
 
-void bfs(int mFrom, int mTo) {
-	pair<int, int> cur = charger[mFrom];
-	pair<int, int> end = charger[mTo];
+bool bound(int x, int y) {
+	if ((0 <= x) & (x < n) & (0 <= y) & (y < n)) {
+		return true;
+	}
+	return false;
+}
 
-	memset(visited, 0, sizeof(visited));
+void bfs(int mID, int mRow, int mCol) {
+	int x, y, nx, ny, d;
 
-	int nx, ny, dist;
+	memset(visited, -1, sizeof(visited));
 
-	queue<pair<pair<int, int>, int>> q;
-	q.push({ cur, 0 });
-	visited[cur.first][cur.second] = 1;
+	queue<pair<int, int>> q;
+	q.emplace(mRow, mCol);
+	visited[mRow][mCol] = 0;
 
 	while (!q.empty()) {
-		cur = q.front().first;
-		dist = q.front().second;
+		x = q.front().first;
+		y = q.front().second;
+		d = visited[x][y];
+		q.pop();
 
-		if (dist > full) {
-			//d[mFrom][mTo] = -1;
-			//d[mTo ][mFrom] = -1;
-			break;
+		if ((map[x][y] >= 2) & (d != 0)) { // 대여소 방문
+			int id = map[x][y] - 2;
+			graph[mID].emplace_back(id, d);
+			graph[id].emplace_back(mID, d);
 		}
 
-		if (cur == end) {
-			// 도착했으면
-			d[mFrom][mTo] = dist;
-			d[mTo][mFrom] = dist;
-			graph[mFrom].push_back(mTo);
-			graph[mTo].push_back(mFrom);
-			break;
-		}
+		for (int i = 0; i < 4; i++) {
+			nx = x + dirs[i][0];
+			ny = y + dirs[i][1];
 
-		for (pair<int, int> d : dirs) {
-			nx = cur.first + d.first;
-			ny = cur.second + d.second;
-
-			if (check(nx, ny) & (map[nx][ny] != 1) & (!visited[nx][ny])) {
-				visited[nx][ny] = 1;
-				q.push({ {nx, ny}, dist + 1 });
+			if (bound(nx, ny) & (map[nx][ny] != 1) & (visited[nx][ny] == -1) & (d + 1 <= range)) {
+				visited[nx][ny] = d + 1;
+				q.emplace(nx, ny);
 			}
 		}
-
-		q.pop();
 	}
 }
 
 void add(int mID, int mRow, int mCol)
 {
-	// 지도 표시
-	map[mRow][mCol] = -1;
+	max_id++;
+	map[mRow][mCol] = mID + 2;
 
-	// 충전소 위치 저장
-	charger.push_back({ mRow, mCol });
-
-	for (int i = 0; i < mID; i++) {
-		bfs(i, mID);
-	}
-	max_id = mID;
-
+	bfs(mID, mRow, mCol);
 	return;
 }
 
 int distance(int mFrom, int mTo)
 {
-	if (graph[mFrom].empty()) {
-		return -1;
-	}
+	int node, d;
 
-	int cur, r;
-	int ans = n * n;
-	memset(d_visited, 0, sizeof(d_visited));
-	fill(dijkstra, dijkstra+max_id+1, n*n);
-
-	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-	pq.push({ 0, mFrom });
-	dijkstra[mFrom] = 0;
-	d_visited[mFrom] = 1;
+	fill_n(visited_dist, max_id + 1, n*n);
+	
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq; // 거리, 노드
+	visited_dist[mFrom] = 0;
+	pq.emplace(0, mFrom);
 
 	while (!pq.empty()) {
-		r = pq.top().first;
-		cur = pq.top().second;
+		d = pq.top().first;
+		node = pq.top().second;
 		pq.pop();
 
-		if (cur == mTo) {
+		if (d > visited_dist[node]) continue;
 
-		}
-		else {
-			for (int g : graph[cur]) {
-				if (!d_visited[g]) {
-					int cur_d = d[cur][g] + r;
-					int ori = dijkstra[g];
-
-					if (cur_d < ori) {
-						d_visited[g] = 1;
-						dijkstra[g] = cur_d;
-						pq.emplace(dijkstra[g], g);
-					}
-
-				}
+		for (auto g : graph[node]) {
+			if (d + g.second < visited_dist[g.first]) {
+				visited_dist[g.first] = d + g.second;
+				pq.emplace(d + g.second, g.first);
 			}
-		}
+		}   
 	}
 
-	return dijkstra[mTo] == n*n ? -1 : dijkstra[mTo];
+	return visited_dist[mTo] == n*n? -1: visited_dist[mTo];
 }
