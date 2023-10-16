@@ -97,6 +97,7 @@ int distance(int mFrom, int mTo)
 		pq.pop();
 
 		if (d > visited_dist[node]) continue;
+		if (node == mTo) break;
 
 		for (auto g : graph[node]) {
 			if (d + g.second < visited_dist[g.first]) {
