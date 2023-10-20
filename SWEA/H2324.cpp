@@ -2,20 +2,23 @@
 #include <vector>
 #include <queue>
  
+#define rint register int
 #define H_MAX 5001
 #define B_MAX 50
 #define D_MAX 50000
  
 using namespace std;
  
-int hotels_brand[H_MAX];
-vector<int> brands_hotel[B_MAX];
+int getBrand[H_MAX];
  
 vector<pair<int, int>> graph[H_MAX]; // 호텔, 거리
 int dist[H_MAX];
  
 int n;
 int min_a, min_b;
+ 
+int root[B_MAX];
+int num[B_MAX];
  
 void dijkstra(int start, int brandA, int brandB) {
     int cur, d;
@@ -33,11 +36,12 @@ void dijkstra(int start, int brandA, int brandB) {
         if (dist[cur] < d) continue;
  
         if (cur != start) {
-            if (!found_a && hotels_brand[cur] == brandA) {
+            rint brand = getRoot(getBrand[cur]);
+            if (!found_a && brand == brandA) {
                 found_a = true;
                 min_a = d;
             }
-            else if (!found_b && hotels_brand[cur] == brandB) {
+            else if (!found_b && brand == brandB) {
                 found_b = true;
                 min_b = d;
             }
@@ -56,14 +60,20 @@ void dijkstra(int start, int brandA, int brandB) {
  
 void init(int N, int mBrands[])
 {
-    int i;
-    for (i = 0; i < N; i++) graph[i].clear();
-    for (i = 0; i < B_MAX; i++)  brands_hotel[i].clear();
- 
     n = N;
+    memset(num, 0, sizeof(num));
+ 
+    rint i;
     for (i = 0; i < N; i++) {
-        hotels_brand[i] = mBrands[i];
-        brands_hotel[mBrands[i]].emplace_back(i);
+        graph[i].clear();
+ 
+        getBrand[i] = mBrands[i];
+        num[mBrands[i]]++;
+    }
+     
+ 
+    for (i = 0; i < B_MAX; i++) {
+        root[i] = i;
     }
 }
  
@@ -73,20 +83,27 @@ void connect(int mHotelA, int mHotelB, int mDistance)
     graph[mHotelB].emplace_back(mHotelA, mDistance);
 }
  
-int merge(int mHotelA, int mHotelB)
-{
-    int eat = hotels_brand[mHotelA];
-    int eaten = hotels_brand[mHotelB];
- 
-    if (eat != eaten) {
-        for (int hotel : brands_hotel[eaten]) {
-            brands_hotel[eat].emplace_back(hotel);
-            hotels_brand[hotel] = eat;
-        }
-        brands_hotel[eaten].clear();
+int getRoot(int i) {
+    if (root[i] == i) {
+        return i;
     }
  
-    return brands_hotel[eat].size();
+    return root[i] = getRoot(root[i]);
+}
+ 
+int merge(int mHotelA, int mHotelB)
+{
+    int eat = getRoot(getBrand[mHotelA]);
+    int eaten = getRoot(getBrand[mHotelB]);
+ 
+    if (eat != eaten) {
+        root[eaten] = eat;
+ 
+        num[eat] += num[eaten];
+        num[eaten] = 0;
+    }
+ 
+    return num[eat];
 }
  
 int move(int mStart, int mBrandA, int mBrandB)
