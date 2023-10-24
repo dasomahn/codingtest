@@ -2,8 +2,11 @@
 #include <unordered_map>
 #include <map>
 #include <unordered_set>
+#include <set>
 #include <cstring>
 #include <string>
+#include <algorithm>
+
 using namespace std;
  
 int N;
@@ -12,15 +15,23 @@ pair<int, string> waitlist[2001];
  
 //unordered_map<string, unordered_set<int>> typos;
 map<pair<string, string>, unordered_set<int>> typos;
-unordered_map<string, unordered_set<string>> dict;
+unordered_map<string, int> dict_idx;
+string dict[9000][5];
+int dict_size[9000];
+int dict_cnt;
  
 void init(int n) {
     N = n;
+    //memset(waitlist, 0, sizeof(waitlist));
+    for (int i = 0; i < n; i++) {
+        waitlist[i] = { 0, "" };
+    }
  
-    memset(waitlist, 0, sizeof(waitlist));
+    memset(dict_size, 0, sizeof(dict_size));
  
+    dict_cnt = 0;
     typos.clear();
-    dict.clear();
+    dict_idx.clear();
 }
  
 bool isTypo(string a, string b) {
@@ -56,44 +67,55 @@ bool isTypo(string a, string b) {
 }
  
 int search(int mId, int searchTime, char searchWord_c[11], char correctWord[5][11]) {
-    string searchWord = string(searchWord_c);
-    int i = 0;
+    if ((waitlist[mId].first) && (searchTime - waitlist[mId].first > 10)) {
+        waitlist[mId].first = 0;
+    }
  
-    // 과거 검색 기록 O
-    if  ((waitlist[mId].first != 0) & (searchTime - waitlist[mId].first <= 10)) {
-        // 오타검사
+    int ret = 0;
+    int idx;
+ 
+    string searchWord = string(searchWord_c);
+    if (dict_idx.find(searchWord) != dict_idx.end()) {
+        idx = dict_idx[searchWord];
+        for (ret = 0; ret < dict_size[idx]; ret++) {
+            strcpy(correctWord[ret], dict[idx][ret].c_str());
+        }
+    }
+ 
+    if (waitlist[mId].first == 0) {
+        // 초기값
+        waitlist[mId] = { searchTime, searchWord };
+    } else {
+ 
         string typo = waitlist[mId].second;
-         
-        if (isTypo(waitlist[mId].second, searchWord)) {
-            pair<string, string> pi = { typo, searchWord };
-            if (typos.find(pi) == typos.end()) {
-                unordered_set<int> set;
-                typos[pi] = set;
-            }
-            typos[pi].emplace(mId);
+        pair<string, string> pi = { typo, searchWord };
+        if (strcmp(typo.c_str(), searchWord_c) == 0);
+        else if (isTypo(typo.c_str(), searchWord_c)) {
+ 
+            typos[pi].insert(mId);
  
             if (typos[pi].size() == 3) {
-                if (dict.find(typo) == dict.end()) {
-                    unordered_set<string> s;
-                    s.emplace(searchWord);
-                    dict[typo] = s;
+                if (dict_idx.find(typo) == dict_idx.end()) {
+                    dict_idx[typo] = dict_cnt++;
                 }
-                else {
-                    // 여러 정답
-                    dict[typo].emplace(searchWord);
+ 
+                idx = dict_idx[typo];
+                bool exist = false;
+                for (int i = 0; i < dict_size[idx]; i++) {
+                    if (strcmp(searchWord_c, dict[idx][i].c_str()) == 0) {
+                        exist = true;
+                        break;
+                    }
+                }
+                if (!exist) {
+                    dict[idx][dict_size[idx]] = searchWord;
+                    ++dict_size[idx];
                 }
             }
+ 
         }
-        // 오타검사 끝
+        waitlist[mId].first = 0;
     }
-    else { //if ((waitlist[mId].first == 0) | (searchTime - waitlist[mId].first > 10)) {
-        waitlist[mId] = { searchTime, searchWord };
-    }
-    if (dict.find(searchWord) != dict.end()) {
-        for (string s : dict[searchWord]) {
-            strcpy(correctWord[i], s.c_str());
-            i++;
-        }
-    }
-    return i;
+ 
+    return ret;
 }
