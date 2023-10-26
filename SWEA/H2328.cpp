@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 #include <vector>
  
 #define PERF_M 1000001
@@ -7,7 +8,13 @@
  
 using namespace std;
  
-vector<pair<int, int>> parts[2][3]; // 위치, 타입
+struct Part {
+    int price;
+    int perf;
+};
+ 
+Part parts[2][3][4000]; // 위치, 타입
+int partCnt[2][3];
 int charge;
  
 struct Result
@@ -18,20 +25,14 @@ struct Result
  
 void init(int mCharge)
 {
-    parts[0][0].clear();
-    parts[0][1].clear();
-    parts[0][2].clear();
-    parts[1][0].clear();
-    parts[1][1].clear();
-    parts[1][2].clear();
- 
+    memset(partCnt, 0, sizeof(partCnt));
     charge = mCharge;
 }
  
 int stock(int mType, int mPrice, int mPerformance, int mPosition)
 {
-    parts[mPosition][mType].emplace_back(mPrice, mPerformance);
-    return parts[mPosition][mType].size();
+    parts[mPosition][mType][partCnt[mPosition][mType]++] = { mPrice, mPerformance };
+    return partCnt[mPosition][mType];
 }
  
 int get_min(int val) {
@@ -41,9 +42,9 @@ int get_min(int val) {
         for (int j = 0; j < 3; j++) {
             mins[i][j] = PRICE_M + 49427;
  
-            for (auto a : parts[i][j]) {
-                if (a.second >= val && mins[i][j] > a.first) {
-                    mins[i][j] = a.first;
+            for (int idx = 0; idx < partCnt[i][j]; idx++) {
+                if (parts[i][j][idx].perf >= val && mins[i][j] > parts[i][j][idx].price) {
+                    mins[i][j] = parts[i][j][idx].price;
                 }
             }
         }
