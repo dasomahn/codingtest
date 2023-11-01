@@ -1,57 +1,56 @@
-#include <cstring>
-#include <algorithm>
+#include <iostream>
  
 using namespace std;
  
 #define MAX 1000000
-#define MIN 10000
-#define ll long long
-#define pi pair<int, int>
  
-int arr[MAX];
-pi seg[MAX * 4];
-int lazy[MAX*4];
+#define Min(A, B)   (A) < (B) ? (A) : (B)
+#define Max(A, B)   (A) > (B) ? (A) : (B)
  
-ll total;
-int l, r;
-int c, er;
+struct Node  {
+    int start, end;
+    int max, min;
+    int lazy;
+    Node* leftTree;
+    Node* rightTree;
+};
  
-pi cmp(pi a, pi b) {
-    return { max(a.first, b.first), min(a.second, b.second) };
-}
+Node segTree[MAX * 4];
  
-void updateLazy(int idx, int start, int end) {
-    if (lazy[idx]) {
-        seg[idx].first += lazy[idx];
-        seg[idx].second += lazy[idx];
-        if (start != end) {
-            lazy[idx * 2] += lazy[idx];
-            lazy[idx * 2 + 1] += lazy[idx];
-        }
-        lazy[idx] = 0;
-    }
-}
+long long total;
+int c, nodeCnt, erased;
  
-void updateSeg(int idx, int start, int end, int x) {
-    updateLazy(idx, start, end);
-     
-    if (r < start || end < l) return;
-    if (l <= start && end <= r) {
-        seg[idx].first += x;
-        seg[idx].second += x;
-        if (start != end) {
-            lazy[idx * 2] += x;
-            lazy[idx * 2 + 1] += x;
-        }
+void updateSeg(Node* node, int left, int right, int val) {
+    if (left > node->end || right < node->start) return;
+ 
+    if (left <= node->start && node->end <= right) {
+        node->lazy += val;
         return;
     }
  
-    int mid = (start + end) / 2;
-    updateSeg(idx * 2, start, mid, x);
-    updateSeg(idx * 2 + 1, mid + 1, end, x);
-    seg[idx] = cmp(seg[idx * 2], seg[idx * 2 + 1]);
-}
+    int mid = (node->start + node->end) >> 1;
+    if (node->leftTree == 0) {
+        segTree[nodeCnt] = { node->start, mid, 0, node->min, node->max, 0, 0 };
+        node->leftTree = &segTree[nodeCnt++];
  
+        segTree[nodeCnt] = { mid + 1, node->end, 0, node->min, node->max, 0, 0 };
+        node->rightTree = &segTree[nodeCnt++];
+    }
+ 
+    if (node->lazy != 0) {
+        node->rightTree->lazy += node->lazy;
+        node->leftTree->lazy += node->lazy;
+        node->lazy = 0;
+    }
+ 
+    updateSeg(node->leftTree, left, right, val);
+    updateSeg(node->rightTree, left, right, val);
+ 
+    node->max = Max(node->leftTree->max + node->leftTree->lazy,
+                    node->rightTree->max + node->rightTree->lazy);
+    node->min = Min(node->leftTree->min + node->leftTree->lazy,
+                    node->rightTree->min + node->rightTree->lazy);
+}
 struct Result {
     int top;
     int count;
@@ -60,26 +59,23 @@ struct Result {
 void init(int C)
 {
     total = 0;
-    er = 0;
     c = C;
-    memset(seg, 0, sizeof(seg));
-    memset(lazy, 0, sizeof(lazy));
+    erased = 0;
+     
+    segTree[0] = { 0, C - 1, 0, 0, 0, 0, 0 };
+    nodeCnt = 1;
 }
  
 Result dropBlocks(int mCol, int mHeight, int mLength)
 {
-    int ret = 0;
     total += mLength * mHeight;
+    updateSeg(&segTree[0], mCol, mCol + mLength - 1, mHeight);
  
-    l = mCol, r = mCol + mLength - 1;
+    int maximum = segTree[0].max + segTree[0].lazy;
+    int minimum = segTree[0].min + segTree[0].lazy;
  
-    updateSeg(1, 0, c - 1, mHeight);
- 
-    int maximum = seg[1].first;
-    int minimum = seg[1].second;
- 
-    total -= (minimum - er) * c;
-    er = minimum;
+    total -= (minimum - erased) * c;
+    erased = minimum;
  
     return { maximum - minimum, total % 1000000 };
 }
